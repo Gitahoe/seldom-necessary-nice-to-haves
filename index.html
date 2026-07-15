@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>GPTP</title>
+<link rel="stylesheet" href="style/theme.css">
+</head>
+<body>
+
+<div style="min-height: 97dvh;">
+	<!-- I/O panels -->
+	<div class="layout">
+	
+		<!-- Panel 1 (left) -->
+		<div class="panel">
+			<div class="panel-header">
+				<span data-label-default="Input" data-label-diff="Input 1">Input</span>
+				<div class="panel-header-controls">
+					<button class="btn-checkbox case-toggle" data-target="panel1" title="Toggle case">aA</button>
+					<span class="stats" id="panel1Stats">0 chars · 0 lines</span>
+				</div>
+			</div>
+			<textarea id="panel1" placeholder="Type, paste, or import text..."></textarea>
+			<div class="row">
+				<label class="file-label">
+					<div class="btn">Import file</div>
+					<input type="file" id="fileImportPanel1" accept=".txt,.csv,.json,.md,.log,.xml,.html,.js,.ts,.css,.py,.java,.c,.cpp,.h,.go,.rs,.yml,.yaml,.ini,.conf">
+				</label>
+				<div class="single-only">
+					<button id="historyPrev" title="Previous input">&laquo; Prev</button>
+					<button id="historyNext" title="Next input">Next &raquo;</button>
+					<span class="history-info" id="historyInfo">history: 0/0</span>
+				</div>
+				<button id="clearPanel1" class="btn-red" style="margin-left:auto">Clear</button>
+			</div>
+		</div>
+	
+		<!-- Panel 2 (right) -->
+		<div class="panel">
+			<div class="panel-header">
+				<span data-label-default="Output" data-label-dual="Input 2">Output</span>
+				<div class="panel-header-controls">
+					<button id="togglePanel2" class="btn-checkbox" hidden>Show text</button>
+					<button class="btn-checkbox case-toggle" data-target="panel2" title="Toggle case">aA</button>
+					<span class="stats" id="panel2Stats">0 chars · 0 lines</span>
+				</div>
+			</div>
+			<textarea id="panel2"
+				placeholder="Result will appear here..."
+				data-placeholder-default="Result will appear here..."
+				data-placeholder-dual="Type, paste, or import the second text..."
+				readonly></textarea>
+			<div id="panel2Custom" hidden></div>
+			<div class="row">
+				<label class="file-label dual-only">
+					<div class="btn">Import file</div>
+					<input type="file" id="fileImportPanel2" accept=".txt,.csv,.json,.md,.log,.xml,.html,.js,.ts,.css,.py,.java,.c,.cpp,.h,.go,.rs,.yml,.yaml,.ini,.conf">
+				</label>
+				<div class="single-only">
+					<button id="copyPanel2" class="btn-green">Copy</button>
+					<button id="usePanel2" class="btn-yellow" title="Move output into input">&laquo; Use as input</button>
+					<button id="downloadPanel2">Download</button>
+				</div>
+				<button id="clearPanel2" class="btn-red" style="margin-left:auto">Clear</button>
+			</div>
+		</div>
+	</div>
+	
+	<!-- Module libraries -->
+	<div class="libraries">
+		<div class="library-tabs">
+			<button class="library-tab active" data-library="gptp">GPTP</button>
+			<button class="library-tab" data-library="encoders">Encoders</button>
+		</div>
+	
+		<!-- GPTP -->
+		<div class="ops library-ops active" data-library="gptp" data-region="library">
+			<div class="ops-tabs">
+				<button class="tab active" data-tab="replace">Bulk replace</button>
+				<button class="tab" data-tab="count">Count occurrences</button>
+				<button class="tab" data-tab="setops" data-mode="dual">Line sets</button>
+				<button class="tab" data-tab="diff" data-mode="dual">Diff</button>
+			</div>
+	
+			<!-- Bulk replace -->
+			<div class="tab-panel active" id="tab-replace">
+				<div class="hint">NOTE: With "rest" enabled, all pairs run in one pass on the original input and anything they didn't match is replaced by the rest value.</div>
+				<div id="replacePairs"></div>
+				<div class="row">
+					<button id="addReplacePair">+ Add pair</button>
+					<button id="toggleRest" class="btn-yellow">+ Rest</button>
+					<button id="runReplace" class="btn-green">Run replace</button>
+					<button id="clearReplacePairs" class="btn-red" style="margin-left:auto">Clear pairs</button>
+				</div>
+			</div>
+	
+			<!-- Count occurences -->
+			<div class="tab-panel" id="tab-count">
+				<textarea id="countNeedles" placeholder="needle1&#10;needle2&#10;..." style="min-height: 100px;"></textarea>
+				<div class="checkbox-row">
+					<label><input type="checkbox" id="countCaseInsensitive"> case-insensitive</label>
+					<label><input type="checkbox" id="countRegex"> regex per line</label>
+					<label><input type="checkbox" id="countOverlapping"> allow overlapping</label>
+				</div>
+				<div class="row">
+					<button id="runCount" class="btn-green">Count</button>
+					<button id="clearNeedles" class="btn-red" style="margin-left:auto">Clear needles</button>
+				</div>
+			</div>
+	
+			<!-- Line sets -->
+			<div class="tab-panel" id="tab-setops">
+				<div class="row">
+					<button data-op="intersect" class="btn-green">A &cap; B</button>
+					<button data-op="union" class="btn-green">A &cup; B</button>
+					<button data-op="diff-ab" class="btn-green">A &minus; B</button>
+					<button data-op="diff-ba" class="btn-green">B &minus; A</button>
+					<button data-op="symdiff" class="btn-green">A &triangle; B</button>
+					<button id="switchInputsSetops" class="btn-yellow">Switch text</button>
+				</div>
+				<div class="checkbox-row">
+					<label><input type="checkbox" id="setopsCI"> case-insensitive</label>
+					<label><input type="checkbox" id="setopsTrim"> trim whitespace</label>
+					<label><input type="checkbox" id="setopsIgnoreEmpty" checked> ignore empty lines</label>
+					<label><input type="checkbox" id="setopsSort"> sort output</label>
+				</div>
+			</div>
+	
+			<!-- Diff -->
+			<div class="tab-panel" id="tab-diff">
+				<div class="row">
+					<button id="runDiff" class="btn-green">Compare</button>
+					<button id="switchInputs" class="btn-yellow">Switch text</button>
+				</div>
+			</div>
+		</div>
+	
+		<!-- Encoders -->
+		<div class="ops library-ops" data-library="encoders" data-region="library">
+			<span id="encoderSelectedName" class="hint">Select an encoder below</span>
+			<div id="encoderParams" class="encoder-params" style="margin-top:6px" hidden></div>
+			<div class="row">
+				<button id="runEncode" class="btn-green">Encode</button>
+				<button id="runDecode" class="btn-green">Decode</button>
+			</div>
+			<div class="row">
+				<input type="text" id="encoderFilter" class="filter" placeholder="Filter by name or example..." />
+			</div>
+			<div id="encoderList" class="encoder-list"></div>
+		</div>
+	</div>
+	
+	<!-- Panel 3 (dual-mode or extra output panel) -->
+	<div id="panel3Wrapper" class="panel panel-result" hidden>
+		<div class="panel-header">
+			<span id="panel3Label">Output</span>
+			<div class="panel-header-controls">
+				<button id="togglePanel3" class="btn-checkbox" hidden>Show text</button>
+				<button class="btn-checkbox case-toggle" data-target="panel3" title="Toggle case">aA</button>
+				<span class="stats" id="panel3Stats">0 chars · 0 lines</span>
+			</div>
+		</div>
+		<textarea id="panel3" placeholder="Result will appear here..." style="min-height: 85px;" readonly></textarea>
+		<div id="panel3Custom" hidden></div>
+		<div class="row">
+			<button id="copyPanel3" class="btn-green">Copy</button>
+			<button id="downloadPanel3">Download</button>
+			<button id="clearPanel3" class="btn-red" style="margin-left:auto">Clear</button>
+		</div>
+	</div>
+</div>
+
+<!-- Utils -->
+<div class="ops utils-ops" data-region="utils">
+	<div class="ops-tabs">
+		<button class="tab active" data-tab="charsets">Charsets</button>
+	</div>
+
+	<!-- Charsets -->
+	<div class="tab-panel active" id="tab-charsets">
+		<div class="hint">NOTE: These are regexes, remember to enable regex mode when pasted without altering the original text.</div>
+		<div class="row">
+			<input type="text" id="charsetFilter" class="filter" placeholder="Filter by name, description, or regex..." />
+		</div>
+		<div id="charsetList"></div>
+	</div>
+</div>
+
+<div id="optionsPopover" hidden>
+	<div class="popover-title">Pair options</div>
+	<label><input type="checkbox" data-opt="ci"> case-insensitive</label>
+	<label><input type="checkbox" data-opt="regex"> regex</label>
+	<label><input type="checkbox" data-opt="ww"> whole word only</label>
+</div>
+
+<div class="alert" id="alert"></div>
+<div id="utilsScrollHint" class="utils-scroll-hint">Scroll down for utils</div>
+
+<!-- Library imports -->
+<script src="libs/index.js"></script>
+<script src="libs/utils/index.js"></script>
+<script src="libs/gptp/index.js"></script>
+<script src="libs/encoders/index.js"></script>
+
+</body>
+</html>
